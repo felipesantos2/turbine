@@ -1,3 +1,35 @@
 {
-    "present":  "Laravel"
+    "preset": "laravel",
+    "rules": {
+        "ordered_traits": true,
+        "concat_space": {
+            "spacing": "one"
+        },
+        "simplified_null_return": true,
+        "function_declaration": true,
+        "no_whitespace_in_blank_line": true,
+        "single_line_after_imports": true,
+        "visibility_required": true,
+        "ternary_operator_spaces": true,
+        "unary_operator_spaces": true,
+        "switch_case_semicolon_to_colon": true,
+        "statement_indentation": true,
+        "no_blank_lines_after_class_opening": true,
+        "array_indentation": true,
+        "binary_operator_spaces": {
+            "default": "single_space",
+            "operators": {
+                "=>": "align_single_space_minimal"
+            }
+        },
+        "no_useless_return": true,
+        "no_closing_tag": true
+    },
+    "exclude": [
+        "lang",
+        "storage",
+        "config",
+        "bootstrap",
+        "vendor"
+    ]
 }
