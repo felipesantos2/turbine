@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Route;
 
 // return all users and one user
 Route::get('/users', [UserController::class, 'index']);
-Route::get('/users/create', [UserController::class, 'create']);
+// Route::get('/users/create', [UserController::class, 'create']);
 Route::post('/users', [UserController::class, 'store']);
 Route::get('/users/{user}', [UserController::class, 'show']);
 Route::put('/users/{user}/edit', [UserController::class, 'edit']);
 Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+// localhost/api/users?orderby[id,desc]
