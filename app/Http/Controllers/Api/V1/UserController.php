@@ -8,16 +8,35 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Response as FacadesResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request): AnonymousResourceCollection
     {
         // returns a json automatically
-        return UserResource::collection(User::all());
+        $users = User::query();
+        // localhost/api/users?id=name&order=desc
+        // localhost/api/users?orderby=id&order=asc&limit=2
+        
+        $orderby = $request->query('orderby');
+        $order = $request->query('order');
+        $limit = $request->query('limit');
+
+        if ($orderby && $order) {
+            $users->orderby($orderby, $order);
+        }
+
+        if ($limit) {
+            $users->limit($limit);
+        }
+
+        $users = $users->get();
+
+        return UserResource::collection($users) ;
     }
 
     // public function create()
@@ -40,24 +59,28 @@ class UserController extends Controller
         ]);
 
         try {
-            User::create($credentials);
+            $created = User::create($credentials);
         } catch (Exception $erro) {
-            // return exception
+            // return is was error
             $response = [
                 'data' => [
-                    'message' => $erro->getMessage(),
+                    'message' => 'The user was not created!', // $erro->getMessage(),
                     'status'  => [
                         'status_text' => Response::$statusTexts[Response::HTTP_CONFLICT],
                         'status_code' => Response::HTTP_CONFLICT,
+                    ],
+                    'request' => [
+                        'uri'    => $request->path(),
+                        'url'    => $request->url(),
+                        'method' => $request->method(),
                     ],
                 ],
             ];
 
             return response($response, Response::HTTP_CONFLICT, [
-                'Accept'       => 'application/json',
-                'Content-Type' => 'application/json',
+                'Content-Type'         => 'application/json',
+                'X-Header-Author-Name' => 'Felipe Pinheiro dos Santos',
             ]);
-
         }
 
         // user has created
@@ -65,15 +88,23 @@ class UserController extends Controller
             'data' => [
                 'message' => 'User created Successfully',
                 'status'  => [
-                    'status_text' => Response::$statusTexts[Response::HTTP_OK],
-                    'status_code' => Response::HTTP_OK,
+                    'status_text' => Response::$statusTexts[Response::HTTP_CREATED],
+                    'status_code' => Response::HTTP_CREATED,
+                ],
+                'request' => [
+                    'uri'    => $request->path(),
+                    'url'    => $request->url(),
+                    'method' => $request->method(),
+                    'body'   => [
+                        'user' => new UserResource($created),
+                    ],
                 ],
             ],
         ];
 
-        return response($response, Response::HTTP_OK, [
-            'Accept'       => 'plain/text',
-            'Content-Type' => 'application/json',
+        return response($response, Response::HTTP_CREATED, [
+            'Content-Type'         => 'application/json',
+            'X-Header-Author-Name' => 'Felipe Pinheiro dos Santos',
         ]);
     }
 
