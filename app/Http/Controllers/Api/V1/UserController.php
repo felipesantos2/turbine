@@ -21,9 +21,9 @@ class UserController extends Controller
         $users = User::query();
         // localhost/api/users?id=name&order=desc
         // localhost/api/users?orderby=id&order=asc&limit=2
-        
-        $orderby = $request->query('orderby');
-        $order = $request->query('order');
+
+        $orderby = $request->string('orderby')->trim();
+        $order = $request->string('order')->trim();
         $limit = $request->query('limit');
 
         if ($orderby && $order) {
@@ -108,9 +108,30 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(User $user): User
+    public function show(User $user): Response
     {
-        return $user;
+        $response = [
+            'data' => [
+                'message' => 'User created Successfully',
+                'status'  => [
+                    'status_text' => Response::$statusTexts[Response::HTTP_OK],
+                    'status_code' => Response::HTTP_OK,
+                ],
+                'request' => [
+                    'uri'    => '',
+                    'url'    => '',
+                    'method' => 'GET',
+                    'body'   => [
+                        'user' => new UserResource($user),
+                    ],
+                ],
+            ],
+        ];
+
+        return response($response, Response::HTTP_OK, [
+            'Content-Type'         => 'application/json',
+            'X-Header-Author-Name' => 'Felipe Pinheiro dos Santos',
+        ]);
     }
 
     public function edit(string $id)
